@@ -93,7 +93,11 @@ if enviado:
             # 1. Puxa as credenciais diretamente e formata a Service Account via código
             creds = dict(st.secrets["connections"]["gsheets"]["service_account"])
             
-            # Força a conexão a usar explicitamente as chaves fornecidas
+            # Remove o conflito do argumento 'type' vindo do arquivo de configuração
+            if "type" in creds:
+                del creds["type"]
+            
+            # Força a conexão a usar as chaves sem duplicação de parâmetros
             conn = st.connection("gsheets", type=GSheetsConnection, **creds)
             
             # 2. Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
