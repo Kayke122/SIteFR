@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
+import json
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -90,24 +91,25 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # Conexão padrão usando as configurações automáticas das Secrets estruturadas do Streamlit
+            # 1. Carrega a string JSON do segredo e converte em um dicionário Python real
+            string_json = st.secrets["connections"]["gsheets"]["service_account"]
+            dados_autenticacao = json.loads(string_json)
+            
+            # 2. Inicializa o conector passando as credenciais diretamente
             conn = st.connection("gsheets", type=GSheetsConnection)
             
-            # Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
+            # 3. Tenta ler os dados passando a conta de serviço explicitamente
             try:
-                df_existente = conn.read(ttl="0d")
+                df_existente = conn.read(ttl="0d", service_account=dados_autenticacao)
             except Exception:
-                # Se a planilha estiver totalmente vazia e sem colunas criadas ainda
                 df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
             
-            # Organiza os novos dados coletados
+            # 4. Organiza e junta os novos dados coletados
             novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
-            
-            # Junta os novos dados com os antigos
             df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
             
-            # Salva na nuvem do Google Sheets de forma definitiva
-            conn.update(data=df_atualizado)
+            # 5. Salva na nuvem forçando o uso do dicionário de autenticação carregado pelo Python
+            conn.update(data=df_atualizado, service_account=dados_autenticacao)
             
             st.write("") # Espaçador
             
@@ -118,7 +120,7 @@ if enviado:
             st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
             
             # Link para o grupo do WhatsApp
-            link_whatsapp = "https://chat.whatsapp.com/IN62WmFZIHn3UxL3dHgzEC?s=sh&p=a&ilr=1"
+            link_whatsapp = "https://whatsapp.com"
             
             st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
