@@ -97,7 +97,8 @@ if enviado:
             
             # CORREÇÃO CRÍTICA: Converte textos "\n" literais em quebras de linha de verdade pro PEM
             if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
+                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\\\n", "\n").replace("\\n", "\n")
+
             
             # 2. Inicializa o gspread autenticando com o dicionário corrigido
             gc = gspread.service_account_from_dict(dados_autenticacao)
