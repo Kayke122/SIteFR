@@ -90,30 +90,23 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Puxa as credenciais diretamente e formata a Service Account via código
-            creds = dict(st.secrets["connections"]["gsheets"]["service_account"])
+            # Conexão padrão usando as configurações automáticas das Secrets estruturadas do Streamlit
+            conn = st.connection("gsheets", type=GSheetsConnection)
             
-            # Remove o conflito do argumento 'type' vindo do arquivo de configuração
-            if "type" in creds:
-                del creds["type"]
-            
-            # Força a conexão a usar as chaves sem duplicação de parâmetros
-            conn = st.connection("gsheets", type=GSheetsConnection, **creds)
-            
-            # 2. Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
+            # Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
             try:
                 df_existente = conn.read(ttl="0d")
             except Exception:
                 # Se a planilha estiver totalmente vazia e sem colunas criadas ainda
                 df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
             
-            # 3. Organiza os novos dados coletados
+            # Organiza os novos dados coletados
             novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
             
-            # 4. Junta os novos dados com os antigos
+            # Junta os novos dados com os antigos
             df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
             
-            # 5. Salva na nuvem do Google Sheets de forma definitiva
+            # Salva na nuvem do Google Sheets de forma definitiva
             conn.update(data=df_atualizado)
             
             st.write("") # Espaçador
