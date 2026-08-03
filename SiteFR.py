@@ -90,34 +90,28 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega o dicionário TOML estruturado diretamente dos segredos do Streamlit
+            # 1. Carrega o dicionário estruturado diretamente dos segredos de forma nativa
             dados_autenticacao = dict(st.secrets["gspread_creds"])
             
-            # Força e corrige os endpoints oficiais globais exigidos pela API de autenticação do Google
+            # Adiciona os endpoints obrigatórios automaticamente em tempo de execução
             dados_autenticacao["auth_uri"] = "https://google.com"
             dados_autenticacao["token_uri"] = "https://googleapis.com"
             dados_autenticacao["auth_provider_x509_cert_url"] = "https://googleapis.com"
+            dados_autenticacao["universe_domain"] = "googleapis.com"
             
-            # Reconstrói os links dinâmicos de certificados usando o próprio client_email do seu robô
             if "client_email" in dados_autenticacao:
                 email_limpo = dados_autenticacao["client_email"].replace("@", "%40")
                 dados_autenticacao["client_x509_cert_url"] = f"https://googleapis.com{email_limpo}"
             
-            dados_autenticacao["universe_domain"] = "googleapis.com"
-            
-            # Corrige de forma garantida as quebras de linha ocultas da chave privada
-            if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
-            
-            # 2. Inicializa o gspread autenticando com o dicionário seguro corrigido em tempo de execução
+            # 2. Inicializa o gspread autenticando diretamente com as credenciais nativas
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
             # 3. Abre a planilha pelo ID único contido na sua URL
             id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
             planilha = gc.open_by_key(id_planilha)
-            aba = planilha.get_worksheet(0) # Pega a primeira aba da planilha
+            aba = planilha.get_worksheet(0)
             
-            # 4. Adiciona uma nova linha com os registros diretamente no final da planilha
+            # 4. Adiciona a nova linha com as colunas na planilha
             aba.append_row([nome, idade, psn_id])
             
             st.write("") # Espaçador
@@ -128,9 +122,7 @@ if enviado:
             st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>COM SUCESSO!</h3>", unsafe_allow_html=True)
             st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
             
-            # Link para o grupo do WhatsApp
             link_whatsapp = "https://whatsapp.com"
-            
             st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
             
