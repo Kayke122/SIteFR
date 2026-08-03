@@ -78,7 +78,7 @@ with st.form("form_inscricao", clear_on_submit=False):
     enviado = st.form_submit_button("Enviar Inscrição >")
 
 # COLE AQUI O LINK DO FORMSPREE QUE VOCÊ COPIOU NO PASSO 1
-URL_FORMSPREE = "https://formspree.io"
+URL_FORMSPREE = "https://formspree.io/f/mojggdya"
 
 # Ações após o envio do formulário
 if enviado:
