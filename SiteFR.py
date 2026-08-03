@@ -93,9 +93,11 @@ if enviado:
             # 1. Carrega o dicionário TOML estruturado diretamente dos segredos do Streamlit
             dados_autenticacao = dict(st.secrets["google_creds"])
             
-            # Limpa qualquer aspa indesejada residual
+            # CORREÇÃO DEFINITIVA: Converte os textos "\n" literais que vieram do TOML em quebras de linha PEM reais
             if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].strip("'\"")
+                pk = str(dados_autenticacao["private_key"])
+                pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
+                dados_autenticacao["private_key"] = pk
             
             # 2. Inicializa o gspread autenticando com o dicionário limpo
             gc = gspread.service_account_from_dict(dados_autenticacao)
