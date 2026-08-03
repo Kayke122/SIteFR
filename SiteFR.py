@@ -106,7 +106,7 @@ if enviado:
                 st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar diretamente no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
                 
                 # Link direto e exclusivo para o grupo do WhatsApp
-                link_grupo_whatsapp = "https://whatsapp.com"
+                link_grupo_whatsapp = "https://chat.whatsapp.com/IN62WmFZIHn3UxL3dHgzEC?s=sh&p=a&ilr=1"
                 
                 st.markdown(f'<a href="{link_grupo_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
