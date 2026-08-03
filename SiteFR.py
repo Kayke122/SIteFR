@@ -85,7 +85,7 @@ if enviado:
     else:
         try:
             # COLE AQUI APENAS O TEXTO DA SUA NOVA PRIVATE KEY COM \n DO ARQUIVO JSON NOVO DENTRO DAS ASPAS TRIPLAS
-            nova_chave_privada = """-----BEGIN PRIVATE KEY-----\nSUA_NOVA_CHAVE_AQUI\n-----END PRIVATE KEY-----\n"""
+            nova_chave_privada = """-----BEGIN PRIVATE KEY-----\nf7da87bbf26b45673a39e2e7e81b80fca11cf241\n-----END PRIVATE KEY-----\n"""
             
             # Limpa qualquer quebra de linha física gerada pelo recuo automático do editor do GitHub
             pk_limpa = nova_chave_privada.strip().replace("\n", "").replace("\\n", "\n")
