@@ -90,8 +90,8 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega o dicionário estruturado diretamente dos segredos de forma nativa
-            dados_autenticacao = dict(st.secrets["gspread_creds"])
+            # 1. Carrega as credenciais convertendo nativamente a tabela TOML para dicionário Python
+            dados_autenticacao = st.secrets["gspread_creds"].to_dict()
             
             # Adiciona os endpoints obrigatórios automaticamente em tempo de execução
             dados_autenticacao["auth_uri"] = "https://google.com"
@@ -103,7 +103,7 @@ if enviado:
                 email_limpo = dados_autenticacao["client_email"].replace("@", "%40")
                 dados_autenticacao["client_x509_cert_url"] = f"https://googleapis.com{email_limpo}"
             
-            # 2. Inicializa o gspread autenticando diretamente com as credenciais nativas
+            # 2. Inicializa o gspread autenticando diretamente com as credenciais nativas estruturadas
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
             # 3. Abre a planilha pelo ID único contido na sua URL
