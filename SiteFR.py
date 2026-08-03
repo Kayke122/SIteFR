@@ -91,14 +91,18 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega o JSON da conta de serviço decodificado do painel Secrets
-            dados_autenticacao = json.loads(st.secrets["connections"]["gsheets"]["service_account"])
+            # 1. Carrega o JSON da conta de serviço decodificado das Secrets
+            string_json = st.secrets["connections"]["gsheets"]["service_account"]
+            dados_autenticacao = json.loads(string_json)
             
-            # 2. Inicializa o gspread autenticando diretamente com as credenciais lidas pelo Python
+            # CORREÇÃO CRÍTICA: Converte textos "\n" literais em quebras de linha de verdade pro PEM
+            if "private_key" in dados_autenticacao:
+                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
+            
+            # 2. Inicializa o gspread autenticando com o dicionário corrigido
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
             # 3. Abre a planilha pelo ID único contido na sua URL
-            # URL fornecida: https://google.com
             id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
             planilha = gc.open_by_key(id_planilha)
             aba = planilha.get_worksheet(0) # Pega a primeira aba da planilha
