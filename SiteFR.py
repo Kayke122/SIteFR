@@ -90,34 +90,22 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # Dicionário com os endpoints oficiais e corrigidos do Google OAuth
-            dados_autenticacao = {
-                "type": "service_account",
-                "project_id": "ultra-surfer-504400-e7",
-                "private_key_id": "c5d4ad9ec3b7da2cf773dcb4032d87db3f09388f",
-                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDd7627BXVl/Lnd\nC+35nXc9+nhJlRoQoYC07pobUeOZ8RXO8j8PYnzPI7Tw/xioS7s2z+G8+zqCZVSl\nRkgG0f0GKgsm8zSYqAC4h6V+v9WET7YfTRWFmo4ikUPvO15GPqgjthR19y7n8/sU\ncII+a103tgoC2Ff/NtSthsqzS1i9Evf5NbJUhiQjUhW45a8c6PtIKd+h2NiLMBpr\nK4IlkM2euof6+4Lxx2M8oT6tp4fgSRqVTt1gCoiQuEdN2jWqWnJTMOlZ7B0M8/DI\nYUJmZLyXDFbcYbZ6kXtblBlcD1gx5IfvVGVvm3NlWbSjKbF0nPdwVQQzyqOc/+xZ\nDaL5NwPTAgMBAAECggEAG/eAgoFBFn1+5GqE7gAYTyCZeNhHpRHc+K/ajpfGoRb+\nwwnGxYcJKEcdHYNf1ZFZgaI3lYtpB5aCUKNnHyjmBBlXN2zNU3FUSeyZ/7tnyhkL\nX61kiWX9BEEe+O4Xxq1NndZrhKQF7qfRm3VEDF6WLBeN8mbVy+zaZxWFxIs5nvWh\nWY48qDvqyysq7XO4TOgZSNVKad9aPWN+AYZsbRx+B91lxu09JPPKZsi7J11Bb0Fq\npH1EGeAPj5Fewj0TiAd5ojec8V5lUdE2jibloOC0uocGYHXVNdCzhrAUimiQxnhF\nydDQT96btKyHz2YXetKfYcJqeoiWQ4MJPGMsKCetrQKBgQD3Ut1s3JrbOsIBEw/2\nNlW6rRIGB9AoU5RwoyPpWAOex6bDJFZyNsH+Efx//zHLRcMA5AMwMYFbW+XSgmjT\nwQrHAwyS14zEa63MhpFz8n7j62Q6uuWNRzr6GMQafZlfkZDwvbK+57m7iidgDcT9\nQA7Jj60X43piHUJjV7hGNQXkRwKBgQDluNEwe8K1Azj83ks2uBil3TXZSWIpYeH0\njIPXAAT0zNWg1tx8/IXLgV9zLpguoXjaClNkbJrk5g6xAXJ5e3vaMS6zsN//xD03\n0jwPPwz+dz7/VXJ/6fO30lDtG3ZaXO9BornPTa9MCQE+t2bQydcgpRlOyBbSeau/\n+7HQSYFmFQKBgQDJAvdmMBJIVgQxvV1+vgCFXX7FmfoLnIqL1XwtfdRLa3dVKSZ9\nY5Xdup6fJTlCPevUwHz64XGCYDl1E3rBiCcLQqYofroxNlcmYMS9GP0an0lyFk7V\nuWvsss5HvYc3Tmcf0v4A/PNOwmVoQyi0sCiUl4qWXNMuBRvdBAGIRjYIpwKBgQCM\nH/g6QsO59oVEebQXZKRkSFMYf5LI+1QA/9VLyE89o9SLj4RfGQnj4L6AW+OoTgaR\ncuq0byrshQhhICjbwV8C8Q0zvqhkMyfEbREFm8gpUEO1LEHzlJl9f2StvRqsdBPd\nTY1ZzmEnWDbSMr0cjoIS/6I4VATXzi/do4ILM0sjIQKBgQCHVJW5xzVabJ4U+9Jd\n43lGfYMy1eHRMH5dORt24Jl0+k/ri0zfX6O/WZwOx/JD3q7IQh//r8ONr5ysMMai\nk7JKSlllnxKZvwddxM8vpTb2lUZxBv8iPwQMi23OQrqa/BWPNVkVvjWPqVSoPANV\np/IZGPl+wdzttEzxiZbOac2Bgw==\n-----END PRIVATE KEY-----\n""",
-                "client_email": "streamlit-sheets@://gserviceaccount.com",
-                "client_id": "109196170715064699897",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/streamlit-sheets%40://gserviceaccount.com",
-                "universe_domain": "googleapis.com"
-            }
+            # 1. Lê a estrutura do dicionário montado de forma nativa e automática do Streamlit Secrets
+            dados_autenticacao = dict(st.secrets["gspread_creds"])
             
-            # Remove quebras de linha físicas inseridas pelo recuo do editor e limpa o formato PEM
+            # Corrige de forma garantida as quebras de linha ocultas da chave privada
             if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\n", "").replace("\\n", "\n")
+                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
             
-            # Inicializa o gspread autenticando com o dicionário de chaves estáveis
+            # 2. Inicializa o gspread autenticando com o dicionário seguro
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
-            # Abre a planilha pelo ID único contido na sua URL
+            # 3. Abre a planilha pelo ID único contido na sua URL
             id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
             planilha = gc.open_by_key(id_planilha)
             aba = planilha.get_worksheet(0) # Pega a primeira aba da planilha
             
-            # Adiciona uma nova linha com os registros diretamente no final da planilha
+            # 4. Adiciona uma nova linha com os registros diretamente no final da planilha
             aba.append_row([nome, idade, psn_id])
             
             st.write("") # Espaçador
@@ -135,7 +123,7 @@ if enviado:
             st.markdown("</div>", unsafe_allow_html=True)
             
         except Exception as e:
-            st.error("Ocorreu um erro ao salvar na planilha. Verifique se as credenciais estão corretas.")
+            st.error("Ocorreu um erro ao salvar na planilha. Verifique se configurou os segredos corretamente.")
             st.exception(e)
 
 # Rodapé simples
