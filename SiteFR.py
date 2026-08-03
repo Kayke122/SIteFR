@@ -1,5 +1,5 @@
 import streamlit as st
-import urllib.parse
+import requests
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -77,31 +77,45 @@ with st.form("form_inscricao", clear_on_submit=False):
     psn_id = st.text_input("ID DA PSN", placeholder="Digite sua ID Online da PSN")
     enviado = st.form_submit_button("Enviar Inscrição >")
 
+# COLE AQUI O LINK DO FORMSPREE QUE VOCÊ COPIOU NO PASSO 1
+URL_FORMSPREE = "https://formspree.io"
+
 # Ações após o envio do formulário
 if enviado:
     if not nome or not idade or not psn_id:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
-        # Monta o texto que você vai receber com as informações do inscrito
-        texto_mensagem = f"Nova Inscrição Formula Racing:\n\n👤 Nome: {nome}\n🎂 Idade: {idade}\n🎮 PSN ID: {psn_id}"
-        texto_codificado = urllib.parse.quote(texto_mensagem)
-        
-        # LINK DO SEU WHATSAPP (Substitua o número abaixo pelo SEU número com DDD)
-        # Exemplo: se seu número for (11) 99999-9999, coloque 5511999999999
-        seu_numero_whatsapp = "5522981703571" 
-        
-        link_envio_dados = f"https://wa.me/{seu_numero_whatsapp}?text={texto_codificado}"
-        
-        st.write("") # Espaçador
-        
-        # Bloco de sucesso que direciona o usuário para te enviar os dados e entrar na comunidade
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>DADOS CONFIRMADOS</h3>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>QUASE PRONTO!</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para nos enviar sua inscrição e receber o link do grupo oficial.</p>", unsafe_allow_html=True)
-        
-        st.markdown(f'<a href="{link_envio_dados}" target="_blank" class="btn-whatsapp">🟢 FINALIZAR INSCRIÇÃO NO WHATSAPP</a>', unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        try:
+            # Organiza os dados para enviar por e-mail de forma oculta
+            dados_formulario = {
+                "Nome Completo": nome,
+                "Idade": idade,
+                "ID da PSN": psn_id
+            }
+            
+            # Envia os dados para a sua conta do Formspree (que manda pro seu e-mail)
+            resposta = requests.post(URL_FORMSPREE, data=dados_formulario)
+            
+            if resposta.status_code == 200:
+                st.write("") # Espaçador
+                
+                # Bloco de sucesso idêntico ao design original
+                st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>INSCRIÇÃO REALIZADA</h3>", unsafe_allow_html=True)
+                st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>COM SUCESSO!</h3>", unsafe_allow_html=True)
+                st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar diretamente no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
+                
+                # Link direto e exclusivo para o grupo do WhatsApp
+                link_grupo_whatsapp = "https://whatsapp.com"
+                
+                st.markdown(f'<a href="{link_grupo_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+            else:
+                st.error("Ocorreu um problema temporário ao enviar a inscrição. Tente novamente.")
+                
+        except Exception as e:
+            st.error("Erro de conexão ao processar os dados.")
+            st.exception(e)
 
 # Rodapé simples
 st.markdown("<br><p style='text-align: center; color: #555555; font-size: 12px;'>FORMULA RACING</p>", unsafe_allow_html=True)
