@@ -90,8 +90,11 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Conecta ao Google Sheets usando as credenciais do Streamlit Cloud Secrets
-            conn = st.connection("gsheets", type=GSheetsConnection)
+            # 1. Puxa as credenciais diretamente e formata a Service Account via código
+            creds = dict(st.secrets["connections"]["gsheets"]["service_account"])
+            
+            # Força a conexão a usar explicitamente as chaves fornecidas
+            conn = st.connection("gsheets", type=GSheetsConnection, **creds)
             
             # 2. Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
             try:
