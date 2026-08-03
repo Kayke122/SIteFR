@@ -1,7 +1,5 @@
 import streamlit as st
-import pandas as pd
-import requests
-import io
+import urllib.parse
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -79,52 +77,31 @@ with st.form("form_inscricao", clear_on_submit=False):
     psn_id = st.text_input("ID DA PSN", placeholder="Digite sua ID Online da PSN")
     enviado = st.form_submit_button("Enviar Inscrição >")
 
-# Link de armazenamento do arquivo de texto na nuvem (Criado exclusivamente para o seu projeto)
-URL_NUVEM = "https://kvdb.io"
-
 # Ações após o envio do formulário
 if enviado:
     if not nome or not idade or not psn_id:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
-        try:
-            # 1. Tenta baixar o arquivo de texto com as inscrições antigas que estão na nuvem
-            resposta = requests.get(URL_NUVEM)
-            
-            if resposta.status_code == 200 and resposta.text.strip():
-                # Se o arquivo já existe na nuvem, lê ele no Pandas
-                df_existente = pd.read_csv(io.StringIO(resposta.text))
-            else:
-                # Se o arquivo estiver vazio ou for a primeira inscrição, cria o cabeçalho do bloco de notas
-                df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
-            
-            # 2. Organiza o novo inscrito
-            novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
-            
-            # 3. Junta o novo inscrito com as linhas antigas do arquivo
-            df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
-            
-            # 4. Transforma o arquivo atualizado de volta em texto/bloco de notas
-            texto_csv = df_atualizado.to_csv(index=False)
-            
-            # 5. Envia e substitui o arquivo de texto atualizado na nuvem de forma persistente
-            requests.post(URL_NUVEM, data=texto_csv)
-            
-            st.write("") # Espaçador
-            
-            # Bloco de sucesso
-            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-            st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>INSCRIÇÃO REALIZADA</h3>", unsafe_allow_html=True)
-            st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>COM SUCESSO!</h3>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
-            
-            link_whatsapp = "https://whatsapp.com"
-            st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-        except Exception as e:
-            st.error("Ocorreu um erro ao salvar a inscrição em texto na nuvem.")
-            st.exception(e)
+        # Monta o texto que você vai receber com as informações do inscrito
+        texto_mensagem = f"Nova Inscrição Formula Racing:\n\n👤 Nome: {nome}\n🎂 Idade: {idade}\n🎮 PSN ID: {psn_id}"
+        texto_codificado = urllib.parse.quote(texto_mensagem)
+        
+        # LINK DO SEU WHATSAPP (Substitua o número abaixo pelo SEU número com DDD)
+        # Exemplo: se seu número for (11) 99999-9999, coloque 5511999999999
+        seu_numero_whatsapp = "5511999999999" 
+        
+        link_envio_dados = f"https://wa.me{seu_numero_whatsapp}?text={texto_codificado}"
+        
+        st.write("") # Espaçador
+        
+        # Bloco de sucesso que direciona o usuário para te enviar os dados e entrar na comunidade
+        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>DADOS CONFIRMADOS</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>QUASE PRONTO!</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para nos enviar sua inscrição e receber o link do grupo oficial.</p>", unsafe_allow_html=True)
+        
+        st.markdown(f'<a href="{link_envio_dados}" target="_blank" class="btn-whatsapp">🟢 FINALIZAR INSCRIÇÃO NO WHATSAPP</a>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # Rodapé simples
 st.markdown("<br><p style='text-align: center; color: #555555; font-size: 12px;'>FORMULA RACING</p>", unsafe_allow_html=True)
