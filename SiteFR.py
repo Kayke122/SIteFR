@@ -90,14 +90,26 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Lê a estrutura do dicionário montado de forma nativa e automática do Streamlit Secrets
+            # 1. Carrega o dicionário TOML estruturado diretamente dos segredos do Streamlit
             dados_autenticacao = dict(st.secrets["gspread_creds"])
+            
+            # Força e corrige os endpoints oficiais globais exigidos pela API de autenticação do Google
+            dados_autenticacao["auth_uri"] = "https://google.com"
+            dados_autenticacao["token_uri"] = "https://googleapis.com"
+            dados_autenticacao["auth_provider_x509_cert_url"] = "https://googleapis.com"
+            
+            # Reconstrói os links dinâmicos de certificados usando o próprio client_email do seu robô
+            if "client_email" in dados_autenticacao:
+                email_limpo = dados_autenticacao["client_email"].replace("@", "%40")
+                dados_autenticacao["client_x509_cert_url"] = f"https://googleapis.com{email_limpo}"
+            
+            dados_autenticacao["universe_domain"] = "googleapis.com"
             
             # Corrige de forma garantida as quebras de linha ocultas da chave privada
             if "private_key" in dados_autenticacao:
                 dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
             
-            # 2. Inicializa o gspread autenticando com o dicionário seguro
+            # 2. Inicializa o gspread autenticando com o dicionário seguro corrigido em tempo de execução
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
             # 3. Abre a planilha pelo ID único contido na sua URL
