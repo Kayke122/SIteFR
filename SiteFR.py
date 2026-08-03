@@ -77,10 +77,10 @@ if enviado:
         texto_formatado = urllib.parse.quote(texto_mensagem)
         
         # ⚠️ ESCREVA SEU NÚMERO ABAIXO (Exemplo: "5521999999999")
-        seu_numero = "55XXXXXXXXXXX" 
+        seu_numero = "558888465510" 
         
         # Link gerado para abrir o seu chat do WhatsApp
-        link_whatsapp = f"https://wa.me{seu_numero}?text={texto_formatado}"
+        link_whatsapp = f"https://wa.me/{seu_numero}?text={texto_formatado}"
         
         # Avisa o usuário e executa o redirecionamento usando JavaScript básico
         st.success("Redirecionando você para o WhatsApp para confirmar a inscrição...")
