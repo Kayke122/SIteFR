@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import gspread
+import requests
+import io
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -78,42 +79,36 @@ with st.form("form_inscricao", clear_on_submit=False):
     psn_id = st.text_input("ID DA PSN", placeholder="Digite sua ID Online da PSN")
     enviado = st.form_submit_button("Enviar Inscrição >")
 
+# Link de armazenamento do arquivo de texto na nuvem (Criado exclusivamente para o seu projeto)
+URL_NUVEM = "https://kvdb.io"
+
 # Ações após o envio do formulário
 if enviado:
     if not nome or not idade or not psn_id:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # COLE AQUI APENAS O TEXTO DA SUA NOVA PRIVATE KEY COM \n DO ARQUIVO JSON NOVO DENTRO DAS ASPAS TRIPLAS
-            nova_chave_privada = """-----BEGIN PRIVATE KEY-----\nf7da87bbf26b45673a39e2e7e81b80fca11cf241\n-----END PRIVATE KEY-----\n"""
+            # 1. Tenta baixar o arquivo de texto com as inscrições antigas que estão na nuvem
+            resposta = requests.get(URL_NUVEM)
             
-            # Limpa qualquer quebra de linha física gerada pelo recuo automático do editor do GitHub
-            pk_limpa = nova_chave_privada.strip().replace("\n", "").replace("\\n", "\n")
+            if resposta.status_code == 200 and resposta.text.strip():
+                # Se o arquivo já existe na nuvem, lê ele no Pandas
+                df_existente = pd.read_csv(io.StringIO(resposta.text))
+            else:
+                # Se o arquivo estiver vazio ou for a primeira inscrição, cria o cabeçalho do bloco de notas
+                df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
             
-            # Monta o dicionário estruturado puxando as variáveis limpas das Secrets individuais
-            dados_autenticacao = {
-                "type": "service_account",
-                "project_id": st.secrets["GOOGLE_PROJECT_ID"],
-                "private_key": pk_limpa,
-                "client_email": st.secrets["GOOGLE_CLIENT_EMAIL"],
-                "auth_uri": "https://google.com",
-                "token_uri": "https://googleapis.com",
-                "auth_provider_x509_cert_url": "https://googleapis.com",
-                "client_x509_cert_url": f"https://googleapis.com{st.secrets['GOOGLE_CLIENT_EMAIL'].replace('@', '%40')}",
-                "universe_domain": "googleapis.com"
-            }
+            # 2. Organiza o novo inscrito
+            novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
             
-            # Inicializa o gspread autenticando diretamente com as credenciais estruturadas na memória do Python
-            gc = gspread.service_account_from_dict(dados_autenticacao)
+            # 3. Junta o novo inscrito com as linhas antigas do arquivo
+            df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
             
-            # Abre a planilha pelo ID único contido na sua URL das Secrets
-            url_planilha = st.secrets["SPREADSHEET_URL"]
-            id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
-            planilha = gc.open_by_key(id_planilha)
-            aba = planilha.get_worksheet(0)
+            # 4. Transforma o arquivo atualizado de volta em texto/bloco de notas
+            texto_csv = df_atualizado.to_csv(index=False)
             
-            # Adiciona a nova linha com as colunas na planilha
-            aba.append_row([nome, idade, psn_id])
+            # 5. Envia e substitui o arquivo de texto atualizado na nuvem de forma persistente
+            requests.post(URL_NUVEM, data=texto_csv)
             
             st.write("") # Espaçador
             
@@ -128,7 +123,7 @@ if enviado:
             st.markdown("</div>", unsafe_allow_html=True)
             
         except Exception as e:
-            st.error("Ocorreu um erro ao salvar na planilha. Verifique se configurou os segredos e colou a chave corretamente.")
+            st.error("Ocorreu um erro ao salvar a inscrição em texto na nuvem.")
             st.exception(e)
 
 # Rodapé simples
