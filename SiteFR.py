@@ -84,32 +84,35 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega as credenciais convertendo nativamente a tabela TOML para dicionário Python
-            dados_autenticacao = st.secrets["gspread_creds"].to_dict()
+            # COLE AQUI APENAS O TEXTO DA SUA NOVA PRIVATE KEY COM \n DO ARQUIVO JSON NOVO DENTRO DAS ASPAS TRIPLAS
+            nova_chave_privada = """-----BEGIN PRIVATE KEY-----\nSUA_NOVA_CHAVE_AQUI\n-----END PRIVATE KEY-----\n"""
             
-            # Injeta as chaves padrão exigidas pelas APIs internas de autenticação do Google
-            dados_autenticacao["auth_uri"] = "https://google.com"
-            dados_autenticacao["token_uri"] = "https://googleapis.com"
-            dados_autenticacao["auth_provider_x509_cert_url"] = "https://googleapis.com"
-            dados_autenticacao["universe_domain"] = "googleapis.com"
+            # Limpa qualquer quebra de linha física gerada pelo recuo automático do editor do GitHub
+            pk_limpa = nova_chave_privada.strip().replace("\n", "").replace("\\n", "\n")
             
-            if "client_email" in dados_autenticacao:
-                email_limpo = dados_autenticacao["client_email"].replace("@", "%40")
-                dados_autenticacao["client_x509_cert_url"] = f"https://googleapis.com{email_limpo}"
+            # Monta o dicionário estruturado puxando as variáveis limpas das Secrets individuais
+            dados_autenticacao = {
+                "type": "service_account",
+                "project_id": st.secrets["GOOGLE_PROJECT_ID"],
+                "private_key": pk_limpa,
+                "client_email": st.secrets["GOOGLE_CLIENT_EMAIL"],
+                "auth_uri": "https://google.com",
+                "token_uri": "https://googleapis.com",
+                "auth_provider_x509_cert_url": "https://googleapis.com",
+                "client_x509_cert_url": f"https://googleapis.com{st.secrets['GOOGLE_CLIENT_EMAIL'].replace('@', '%40')}",
+                "universe_domain": "googleapis.com"
+            }
             
-            # Trata as quebras de linha PEM de forma estável na memória
-            if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\n", "\n")
-            
-            # 2. Autentica com o gspread de forma nativa e direta
+            # Inicializa o gspread autenticando diretamente com as credenciais estruturadas na memória do Python
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
-            # 3. Abre a planilha diretamente pela ID única integrada no código
+            # Abre a planilha pelo ID único contido na sua URL das Secrets
+            url_planilha = st.secrets["SPREADSHEET_URL"]
             id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
             planilha = gc.open_by_key(id_planilha)
             aba = planilha.get_worksheet(0)
             
-            # 4. Adiciona a linha contendo os dados coletados do usuário no formulário
+            # Adiciona a nova linha com as colunas na planilha
             aba.append_row([nome, idade, psn_id])
             
             st.write("") # Espaçador
@@ -125,7 +128,7 @@ if enviado:
             st.markdown("</div>", unsafe_allow_html=True)
             
         except Exception as e:
-            st.error("Ocorreu um erro ao salvar na planilha. Verifique se configurou os segredos corretamente.")
+            st.error("Ocorreu um erro ao salvar na planilha. Verifique se configurou os segredos e colou a chave corretamente.")
             st.exception(e)
 
 # Rodapé simples
