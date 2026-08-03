@@ -90,7 +90,7 @@ if enviado:
         # Exemplo: se seu número for (11) 99999-9999, coloque 5511999999999
         seu_numero_whatsapp = "5522981703571" 
         
-        link_envio_dados = f"https://wa.me{seu_numero_whatsapp}?text={texto_codificado}"
+        link_envio_dados = f"https://wa.me/{seu_numero_whatsapp}?text={texto_codificado}"
         
         st.write("") # Espaçador
         
