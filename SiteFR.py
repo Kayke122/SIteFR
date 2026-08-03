@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection
+import gspread
 import json
 
 # Configuração da página para tema escuro nativo do Streamlit
@@ -91,25 +91,20 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega a string JSON do segredo e converte em um dicionário Python real
-            string_json = st.secrets["connections"]["gsheets"]["service_account"]
-            dados_autenticacao = json.loads(string_json)
+            # 1. Carrega o JSON da conta de serviço decodificado do painel Secrets
+            dados_autenticacao = json.loads(st.secrets["connections"]["gsheets"]["service_account"])
             
-            # 2. Inicializa o conector passando as credenciais diretamente
-            conn = st.connection("gsheets", type=GSheetsConnection)
+            # 2. Inicializa o gspread autenticando diretamente com as credenciais lidas pelo Python
+            gc = gspread.service_account_from_dict(dados_autenticacao)
             
-            # 3. Tenta ler os dados passando a conta de serviço explicitamente
-            try:
-                df_existente = conn.read(ttl="0d", service_account=dados_autenticacao)
-            except Exception:
-                df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
+            # 3. Abre a planilha pelo ID único contido na sua URL
+            # URL fornecida: https://google.com
+            id_planilha = "11WQ4_Q4KUIjrQgkVWlC2V2DjkBk6x0V4-wdfogifU-g"
+            planilha = gc.open_by_key(id_planilha)
+            aba = planilha.get_worksheet(0) # Pega a primeira aba da planilha
             
-            # 4. Organiza e junta os novos dados coletados
-            novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
-            df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
-            
-            # 5. Salva na nuvem forçando o uso do dicionário de autenticação carregado pelo Python
-            conn.update(data=df_atualizado, service_account=dados_autenticacao)
+            # 4. Adiciona uma nova linha com os registros diretamente no final da planilha
+            aba.append_row([nome, idade, psn_id])
             
             st.write("") # Espaçador
             
