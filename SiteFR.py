@@ -62,8 +62,6 @@ st.html("""
 </style>
 """)
 
-# Topo do site (Logo e Chamada principal)
-st.image("Fr1.png", use_container_width=True)
 
 st.markdown("<h2 style='text-align: center; font-weight: 900; margin-bottom: 0;'>FAÇA SUA INSCRIÇÃO</h2>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center; color: #ff1e27; font-weight: 900; margin-top: -15px;'>E ENTRE NA PISTA!</h2>", unsafe_allow_html=True)
@@ -94,8 +92,8 @@ if enviado:
         texto_formatado = urllib.parse.quote(texto_mensagem)
         
         # ⚠️ INSIRA SEU NÚMERO COM DDD ABAIXO
-        seu_numero = "55XXXXXXXXXXX" 
-        link_whatsapp = f"https://wa.me{seu_numero}?text={texto_formatado}"
+        seu_numero = "558888465510" 
+        link_whatsapp = f"https://wa.me/{seu_numero}?text={texto_formatado}"
         
         st.write("") # Espaçador
         
