@@ -92,7 +92,7 @@ if enviado:
     else:
         try:
             # Colamos o texto bruto do arquivo JSON original diretamente aqui para evitar quebras do interpretador TOML
-            json_bruto = '{
+            json_bruto =
   "type": "service_account",
   "project_id": "ultra-surfer-504400-e7",
   "private_key_id": "c5d4ad9ec3b7da2cf773dcb4032d87db3f09388f",
@@ -104,7 +104,7 @@ if enviado:
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/streamlit-sheets%40ultra-surfer-504400-e7.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
-}
+
 '
             
             dados_autenticacao = json.loads(json_bruto)
