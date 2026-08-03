@@ -88,7 +88,7 @@ if enviado:
         
         # LINK DO SEU WHATSAPP (Substitua o número abaixo pelo SEU número com DDD)
         # Exemplo: se seu número for (11) 99999-9999, coloque 5511999999999
-        seu_numero_whatsapp = "5511999999999" 
+        seu_numero_whatsapp = "5522981703571" 
         
         link_envio_dados = f"https://wa.me{seu_numero_whatsapp}?text={texto_codificado}"
         
