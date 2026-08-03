@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import gspread
-import json
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -91,16 +90,14 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # 1. Carrega o JSON da conta de serviço decodificado das Secrets
-            string_json = st.secrets["connections"]["gsheets"]["service_account"]
-            dados_autenticacao = json.loads(string_json)
+            # 1. Carrega o dicionário TOML estruturado diretamente dos segredos do Streamlit
+            dados_autenticacao = dict(st.secrets["google_creds"])
             
-            # CORREÇÃO CRÍTICA: Converte textos "\n" literais em quebras de linha de verdade pro PEM
+            # Limpa qualquer aspa indesejada residual
             if "private_key" in dados_autenticacao:
-                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].replace("\\\\n", "\n").replace("\\n", "\n")
-
+                dados_autenticacao["private_key"] = dados_autenticacao["private_key"].strip("'\"")
             
-            # 2. Inicializa o gspread autenticando com o dicionário corrigido
+            # 2. Inicializa o gspread autenticando com o dicionário limpo
             gc = gspread.service_account_from_dict(dados_autenticacao)
             
             # 3. Abre a planilha pelo ID único contido na sua URL
