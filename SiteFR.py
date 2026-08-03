@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import os
+from streamlit_gsheets import GSheetsConnection
 
 # Configuração da página para tema escuro nativo do Streamlit
 st.set_page_config(page_title="Formula Racing", page_icon="🏁", layout="centered")
@@ -89,29 +89,43 @@ if enviado:
     if not nome or not idade or not psn_id:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
-        # Salva as informações localmente no arquivo CSV incluindo a PSN
-        dados = {"Nome": [nome], "Idade": [idade], "PSN_ID": [psn_id]}
-        df = pd.DataFrame(dados)
-        arquivo = "inscritos_formula_racing.csv"
-        
-        if os.path.exists(arquivo):
-            df.to_csv(arquivo, mode='a', header=False, index=False)
-        else:
-            df.to_csv(arquivo, index=False)
+        try:
+            # 1. Conecta ao Google Sheets usando as credenciais do Streamlit Cloud Secrets
+            conn = st.connection("gsheets", type=GSheetsConnection)
             
-        st.write("") # Espaçador
-        
-        # Bloco de sucesso idêntico à imagem externa
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>INSCRIÇÃO REALIZADA</h3>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>COM SUCESSO!</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
-        
-        # Link para o grupo do WhatsApp
-        link_whatsapp = "https://chat.whatsapp.com/IN62WmFZIHn3UxL3dHgzEC?s=sh&p=a&ilr=1"
-        
-        st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+            # 2. Tenta ler os dados já existentes na planilha (ttl=0d garante tempo real)
+            try:
+                df_existente = conn.read(ttl="0d")
+            except Exception:
+                # Se a planilha estiver totalmente vazia e sem colunas criadas ainda
+                df_existente = pd.DataFrame(columns=["Nome", "Idade", "PSN_ID"])
+            
+            # 3. Organiza os novos dados coletados
+            novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
+            
+            # 4. Junta os novos dados com os antigos
+            df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
+            
+            # 5. Salva na nuvem do Google Sheets de forma definitiva
+            conn.update(data=df_atualizado)
+            
+            st.write("") # Espaçador
+            
+            # Bloco de sucesso idêntico à imagem externa
+            st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #ffffff; margin-bottom: 0;'>INSCRIÇÃO REALIZADA</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #25d366; margin-top: -15px;'>COM SUCESSO!</h3>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #aaaaaa;'>Clique no botão abaixo para entrar no grupo oficial da Formula Racing.</p>", unsafe_allow_html=True)
+            
+            # Link para o grupo do WhatsApp
+            link_whatsapp = "https://chat.whatsapp.com/IN62WmFZIHn3UxL3dHgzEC?s=sh&p=a&ilr=1"
+            
+            st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">💬 ENTRAR NO GRUPO DO WHATSAPP</a>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        except Exception as e:
+            st.error("Ocorreu um erro ao salvar na planilha. Verifique se configurou o passo das 'Secrets' corretamente no painel do Streamlit.")
+            st.exception(e)
 
 # Rodapé simples
 st.markdown("<br><p style='text-align: center; color: #555555; font-size: 12px;'>FORMULA RACING</p>", unsafe_allow_html=True)
