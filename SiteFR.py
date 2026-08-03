@@ -31,7 +31,7 @@ if enviado:
         st.error("Por favor, preencha todos os campos do formulário.")
     else:
         try:
-            # Conexão nativa e limpa do Streamlit
+            # Conexão nativa e protegida por criptografia interna do Streamlit
             conn = st.connection("gsheets", type=GSheetsConnection)
             
             try:
@@ -42,7 +42,6 @@ if enviado:
             novos_dados = pd.DataFrame([{"Nome": nome, "Idade": idade, "PSN_ID": psn_id}])
             df_atualizado = pd.concat([df_existente, novos_dados], ignore_index=True)
             
-            # Atualiza de forma transparente usando as Secrets do Painel
             conn.update(data=df_atualizado)
             
             st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
