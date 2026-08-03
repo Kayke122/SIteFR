@@ -42,7 +42,7 @@ st.html("""
         text-transform: uppercase;
         cursor: pointer;
     }
-    /* Botão Verde do WhatsApp (Livre de bloqueios) */
+    /* Botão Verde do WhatsApp */
     .btn-whatsapp {
         background-color: #25d366;
         color: white !important;
@@ -62,9 +62,14 @@ st.html("""
 </style>
 """)
 
+# Topo do site (Logo e Chamada principal)
+st.image("Fr1.png", use_container_width=True)
+
 st.markdown("<h2 style='text-align: center; font-weight: 900; margin-bottom: 0;'>FAÇA SUA INSCRIÇÃO</h2>", unsafe_allow_html=True)
 st.markdown("<h2 style='text-align: center; color: #ff1e27; font-weight: 900; margin-top: -15px;'>E ENTRE NA PISTA!</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #aaaaaa;'>Preencha seus dados abaixo para gerar sua ficha de inscrição do campeonato de F1 2013 no PS3.</p>", unsafe_allow_html=True)
+
+# Texto do cabeçalho mais explícito sobre a necessidade do WhatsApp
+st.markdown("<p style='text-align: center; color: #aaaaaa; font-weight: bold;'>⚠️ ATENÇÃO: Preencha seus dados abaixo para gerar sua ficha. Para FINALIZAR e garantir sua vaga no campeonato de F1 2013, você DEVE clicar no link que aparecerá e enviar a mensagem no WhatsApp.</p>", unsafe_allow_html=True)
 
 st.write("") # Espaçador
 
@@ -82,25 +87,26 @@ with st.form("form_inscricao", clear_on_submit=False):
 # Ações após o envio do formulário
 if enviado:
     if not nome or not idade or not psn_id:
-        st.error("Por favor, preencha todos os campos do formulário antes de enviar.")
+        st.error("Por favor, preencha todos os campos do formulário antes de continuar.")
     else:
         # Montagem do texto automático da mensagem
         texto_mensagem = f"Olá! Quero me inscrever no campeonato Fórmula Racing:\n\n🏁 *Ficha de Inscrição*\n👤 *Nome:* {nome}\n🎂 *Idade:* {idade}\n🎮 *ID da PSN:* {psn_id}"
         texto_formatado = urllib.parse.quote(texto_mensagem)
         
         # ⚠️ INSIRA SEU NÚMERO COM DDD ABAIXO
-        seu_numero = "558888465510" 
-        link_whatsapp = f"https://wa.me/{seu_numero}?text={texto_formatado}"
+        seu_numero = "55XXXXXXXXXXX" 
+        link_whatsapp = f"https://wa.me{seu_numero}?text={texto_formatado}"
         
         st.write("") # Espaçador
         
-        # Alerta o usuário para clicar no botão final seguro
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #25d366; margin-bottom: 5px;'>FICHA GERADA COM SUCESSO!</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #aaaaaa; margin-bottom: 0;'>Clique no botão verde abaixo para enviar os dados diretamente para o organizador.</p>", unsafe_allow_html=True)
+        # Instrução reforçada na tela de sucesso
+        st.markdown("<div style='text-align: center; border: 2px dashed #25d366; padding: 20px; border-radius: 8px; background-color: #0e1e14;'>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #25d366; margin-bottom: 5px; font-weight: bold;'>PASSO FINAL OBRIGATÓRIO!</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #ffffff; font-weight: bold; margin-bottom: 10px;'>Sua ficha foi gerada, mas sua inscrição AINDA NÃO terminou.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #aaaaaa; margin-bottom: 0;'>Clique no botão verde abaixo para abrir o seu WhatsApp e ENVIAR os dados para o organizador. Apenas o envio da mensagem garante a sua vaga.</p>", unsafe_allow_html=True)
         
-        # Botão HTML nativo: navegadores permitem abertura pois é um clique direto do usuário
-        st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">📲 ENVIAR INSCRIÇÃO PELO WHATSAPP</a>', unsafe_allow_html=True)
+        # Botão HTML de envio direto
+        st.markdown(f'<a href="{link_whatsapp}" target="_blank" class="btn-whatsapp">📲 CLIQUE AQUI PARA ENVIAR VIA WHATSAPP</a>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
 # Rodapé
